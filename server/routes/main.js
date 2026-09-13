@@ -24,8 +24,21 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Router Post id
+router.get('/post/:id', async (req, res) => {
+  try {
+    let id = req.params.id;
 
-
+    const data = await Post.findById(id);
+    const locals = {
+      title: data.title,
+      description: "Simple Blog created with NodeJs, Express & MongoDb."
+    }
+    res.render('post', { locals, data })
+  } catch (error) {
+    console.log(error);
+  }
+})
 
 
 
@@ -38,11 +51,19 @@ router.get('/', async (req, res) => {
 
 
 router.get('/about', (req, res) => {
-  res.render('about');
+  const locals = {
+      title: "About | godoflevel Blog",
+      description: "Simple Blog created with NodeJs, Express & MongoDb."
+    }
+  res.render('about', { locals });
 });
 
 router.get('/contact', (req, res) => {
-  res.render('contact');
+  const locals = {
+      title: "Contact | godoflevel Blog",
+      description: "Simple Blog created with NodeJs, Express & MongoDb."
+    }
+  res.render('contact', { locals });
 })
 
 
