@@ -2,6 +2,9 @@ require('dotenv').config();
 
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const { MongoStore } = require('connect-mongo');
 
 const connectDB = require('./server/config/db');
 
@@ -14,6 +17,20 @@ connectDB();
 
 app.use(express.urlencoded({ extended: true })); // turn on HTML Forms
 app.use(express.json()); // turn on JSON
+app.use(cookieParser());
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI
+  }),
+  cookie: { httpOnly: true,
+  //  secure: true,
+  //  maxAge: new Date ( Date.now() + (3600000))
+  },
+}))
 
 app.use(express.static('public'));
 
