@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     const count = await Post.countDocuments();
     const nextPage = parseInt(page) + 1;
     const hasNextPage = nextPage <= Math.ceil(count / perPage);
-    res.render('index', { locals, data, current: page, nextPage: hasNextPage ? nextPage : null });
+    res.render('index', { locals, data, current: page, nextPage: hasNextPage ? nextPage : null, currentRoute: '/' });
   } catch (error) {
     console.log(error);
   }
@@ -34,7 +34,7 @@ router.get('/post/:id', async (req, res) => {
       title: data.title,
       description: "Simple Blog created with NodeJs, Express & MongoDb."
     }
-    res.render('post', { locals, data })
+    res.render('post', { locals, data, currentRoute: `/post/${id}` })
   } catch (error) {
     console.log(error);
   }
@@ -74,7 +74,7 @@ router.get('/about', (req, res) => {
       title: "About | godoflevel Blog",
       description: "Simple Blog created with NodeJs, Express & MongoDb."
     }
-  res.render('about', { locals });
+  res.render('about', { locals, currentRoute: '/about' });
 });
 
 router.get('/contact', (req, res) => {
@@ -82,7 +82,7 @@ router.get('/contact', (req, res) => {
       title: "Contact | godoflevel Blog",
       description: "Simple Blog created with NodeJs, Express & MongoDb."
     }
-  res.render('contact', { locals });
+  res.render('contact', { locals, currentRoute: '/contact' });
 })
 
 
