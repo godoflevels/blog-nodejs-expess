@@ -17,7 +17,7 @@ body {
   color: var(--black);
   font-size: var(--font-size-base);
   background-color: #FAF5EE;
-  background-image: url("img/img-noise-361x370.png");
+  background-image: url("/img/img-noise-361x370.png");
   margin: 0;
 }
 
@@ -277,8 +277,8 @@ img {
 
 /* SearchBar */
 .searchBar {
-  /* visibility: hidden;
-  transform: translateY(-100px); */
+  visibility: hidden;
+  transform: translateY(-100px);
   background-color: var(--black);
   padding: 4px 0;
   position: absolute;
@@ -300,8 +300,9 @@ img {
   position: absolute;
   top: 0;
   right: 0;
-  color: var(--gray-light);
+  color: var(--black);
   padding: 15px;
+  cursor: pointer;
 }
 
 /* Dashboard Admin */
