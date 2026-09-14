@@ -22,6 +22,7 @@ app.use(express.json()); // turn on JSON
 app.use(cookieParser());
 app.use(methodOverride('_method'));
 
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -46,6 +47,15 @@ app.locals.isActiveRoute = isActiveRoute;
 
 app.use('/', require('./server/routes/main'));
 app.use('/', require('./server/routes/admin'));
+
+app.use((req, res) => {
+  res.status(404).render('404', {
+    locals: { title: '404', description: 'Page not found' },
+    currentRoute: ''
+  });
+});
+
+app.use((err, req, res, next) => { console.error(err); res.status(500).send('Server error'); });
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
