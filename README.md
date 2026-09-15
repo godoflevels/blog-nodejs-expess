@@ -1,5 +1,7 @@
 # Blog
 
+![Blog homepage](public/img/home.png)
+
 A small blogging engine built with Node.js, Express and MongoDB.
 
 The public side lists posts with pagination, opens a single post and
