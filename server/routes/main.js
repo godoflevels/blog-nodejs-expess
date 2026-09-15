@@ -4,59 +4,63 @@ const Post = require('../models/Post');
 
 // Routes GET / HOME
 router.get('/', async (req, res) => {
-  const locals = {
-    title: "godoflevel Blog",
-    description: "Simple Blog created with NodeJs, Express & MongoDb."
+  try {
+    const locals = {
+      title: "godoflevel Blog",
+      description: "Simple Blog created with NodeJs, Express & MongoDb."
+    }
+
+    let perPage = 10;
+    let page = req.query.page || 1;
+
+    const data = await Post.aggregate([ {$sort: { createdAt: -1 } } ]).skip(perPage * (page - 1)).limit(perPage).exec();
+
+    const count = await Post.countDocuments();
+    const nextPage = parseInt(page) + 1;
+    const hasNextPage = nextPage <= Math.ceil(count / perPage);
+    res.render('index', { locals, data, current: page, nextPage: hasNextPage ? nextPage : null, currentRoute: '/' });
+  } catch (error) {
+    console.log(error);
   }
-
-  let perPage = 10;
-  let page = req.query.page || 1;
-
-  const data = await Post.aggregate([ {$sort: { createdAt: -1 } } ]).skip(perPage * (page - 1)).limit(perPage).exec();
-
-  const count = await Post.countDocuments();
-  const nextPage = parseInt(page) + 1;
-  const hasNextPage = nextPage <= Math.ceil(count / perPage);
-  res.render('index', { locals, data, current: page, nextPage: hasNextPage ? nextPage : null, currentRoute: '/' });
 });
 
 // Router GET / Post :id
 router.get('/post/:id', async (req, res) => {
-  const id = req.params.id;
+  try {
+    let id = req.params.id;
 
-  const data = await Post.findById(id);
-
-  if (!data) {
-    return res.status(404).render('404', {
-      locals: { title: '404', description: 'Post not found' },
-      currentRoute: ''
-    });
+    const data = await Post.findById(id);
+    const locals = {
+      title: data.title,
+      description: "Simple Blog created with NodeJs, Express & MongoDb."
+    }
+    res.render('post', { locals, data, currentRoute: `/post/${id}` })
+  } catch (error) {
+    console.log(error);
   }
-
-  const locals = {
-    title: data.title,
-    description: "Simple Blog created with NodeJs, Express & MongoDb."
-  }
-  res.render('post', { locals, data, currentRoute: `/post/${id}` })
 })
 
 // Router POST / Post :id
 router.post('/search', async (req, res) => {
-  const locals = {
-    title: "Search",
-    description: "Simple Blog created with NodeJs, Express & MongoDb."
+  try {
+    const locals = {
+      title: "Search",
+      description: "Simple Blog created with NodeJs, Express & MongoDb."
+    }
+
+    let searchTerm = req.body.searchTerm;
+    const searchNoSpecialChar = searchTerm.replace(/[^\p{L}\p{N}\s]/gu, "");
+
+    const data = await Post.find({
+      $or: [
+      { title: { $regex: new RegExp(searchNoSpecialChar, 'i')}},
+      { body: { $regex: new RegExp(searchNoSpecialChar, 'i')}},
+      ]
+    });
+    res.render("search", {data, locals});
+  } catch (error) {
+    console.log(error);
   }
-
-  let searchTerm = req.body.searchTerm;
-  const searchNoSpecialChar = searchTerm.replace(/[^\p{L}\p{N}\s]/gu, "");
-
-  const data = await Post.find({
-    $or: [
-    { title: { $regex: new RegExp(searchNoSpecialChar, 'i')}},
-    { body: { $regex: new RegExp(searchNoSpecialChar, 'i')}},
-    ]
-  });
-  res.render("search", {data, locals});
 })
 
 
