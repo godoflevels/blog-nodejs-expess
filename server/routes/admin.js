@@ -55,7 +55,12 @@ router.post('/admin', async (req, res, next) => {
       }
 
       const token = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '30d'});
-      res.cookie('token', token, {httpOnly: true, sameSite: 'strict', maxAge: 10 * 24 * 60 * 60 * 1000});
+      res.cookie('token', token, {
+        httpOnly: true, 
+        sameSite: 'strict', 
+        maxAge: 10 * 24 * 60 * 60 * 1000, 
+        secure: process.env.NODE_ENV === 'production',
+      });
 
       res.redirect('/dashboard')
     } catch (error) {
