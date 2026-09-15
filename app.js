@@ -46,13 +46,13 @@ app.set('view engine', 'ejs');
 app.locals.isActiveRoute = isActiveRoute;
 app.locals.siteUrl = process.env.SITE_URL || 'http://localhost:3000';
 
-app.use('/', require('./server/routes/main'));
-app.use('/', require('./server/routes/admin'));
-
 app.use((req, res, next) => {
   res.locals.currentUrl = req.originalUrl;
   next();
 });
+
+app.use('/', require('./server/routes/main'));
+app.use('/', require('./server/routes/admin'));
 
 app.use((req, res) => {
   res.status(404).render('404', {
