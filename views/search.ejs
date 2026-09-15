@@ -3,6 +3,10 @@
 </div>
 
 <section classs="articles">
+  <% if (data.length === 0) { %>
+    <p>Ничего не найдено.</p>
+  <% } %>
+
   <ul class="article-ul">
     <% data.forEach(post => { %>
       <li>

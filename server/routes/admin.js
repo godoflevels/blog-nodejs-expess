@@ -26,7 +26,7 @@ const authMiddleware = (req, res, next) => {
 
 
 // GET Admin - Login Page
-router.get('/admin', (req, res) => {
+router.get('/admin', (req, res, next) => {
     try {
       const locals = {
         title: "Admin",
@@ -34,12 +34,12 @@ router.get('/admin', (req, res) => {
       }
       res.render('admin/index', { locals, layout: adminLayout });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
 });
 
 // POST Admin - Check Login
-router.post('/admin', async (req, res) => {
+router.post('/admin', async (req, res, next) => {
     try {
       const { username, password } = req.body;
       const user = await User.findOne({username});
@@ -54,17 +54,17 @@ router.post('/admin', async (req, res) => {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const token = jwt.sign({ userId: user._id }, jwtSecret);
-      res.cookie('token', token, {httpOnly: true});
+      const token = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '30d'});
+      res.cookie('token', token, {httpOnly: true, sameSite: 'strict', maxAge: 10 * 24 * 60 * 60 * 1000});
 
       res.redirect('/dashboard')
     } catch (error) {
-      console.log(error);
+      next(error);
     }
 });
 
 // GET Admin - Dasboard
-router.get('/dashboard', authMiddleware, async (req, res) => {
+router.get('/dashboard', authMiddleware, async (req, res, next) => {
   try {
     const locals = {
         title: "Dashboard",
@@ -73,12 +73,12 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
     const data = await Post.find();
     res.render('admin/dashboard', { locals, data, layout: adminLayout });
   } catch (error) {
-    console.log(error)
+    next(error);
   }
 });
 
 // GET Admin - Create new post
-router.get('/add-post', authMiddleware, async (req, res) => {
+router.get('/add-post', authMiddleware, async (req, res, next) => {
   try {
     const locals = {
         title: "Add Post",
@@ -86,31 +86,27 @@ router.get('/add-post', authMiddleware, async (req, res) => {
       }
     res.render('admin/add-post', { locals, layout: adminLayout });
   } catch (error) {
-    console.log(error)
+    next(error);
   }
 });
 
 // POST Admin - Create new post
-router.post('/add-post', authMiddleware, async (req, res) => {
+router.post('/add-post', authMiddleware, async (req, res, next) => {
   try {
-    try {
-      const newPost = new Post({
-        title: req.body.title,
-        body: req.body.body
-      });
+    const newPost = new Post({
+      title: req.body.title,
+      body: req.body.body
+    });
 
-      await Post.create(newPost);
-      res.redirect('/dashboard');
-    } catch (error) {
-      console.log(error);
-    }
+    await Post.create(newPost);
+    res.redirect('/dashboard');
   } catch (error) {
-    console.log(error)
+    next(error);
   }
 });
 
 // GET Admin - Edit post
-router.get('/edit-post/:id', authMiddleware, async (req, res) => {
+router.get('/edit-post/:id', authMiddleware, async (req, res, next) => {
   try {
     const locals = {
         title: "Edit Post",
@@ -120,12 +116,12 @@ router.get('/edit-post/:id', authMiddleware, async (req, res) => {
 
     res.render('admin/edit-post', { locals, data, layout: adminLayout })
   } catch (error) {
-    console.log(error)
+    next(error);
   }
 });
 
 // PUT Admin - Edit post
-router.put('/edit-post/:id', authMiddleware, async (req, res) => {
+router.put('/edit-post/:id', authMiddleware, async (req, res, next) => {
   try {
     await Post.findByIdAndUpdate(req.params.id, {
       title: req.body.title,
@@ -135,7 +131,7 @@ router.put('/edit-post/:id', authMiddleware, async (req, res) => {
 
     res.redirect(`/edit-post/${req.params.id}`);
   } catch (error) {
-    console.log(error)
+    next(error);
   }
 });
 
@@ -180,12 +176,12 @@ router.put('/edit-post/:id', authMiddleware, async (req, res) => {
 // });
 
 // DELETE / Admin - Delete Post
-router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
+router.delete('/delete-post/:id', authMiddleware, async (req, res, next) => {
   try {
     await Post.deleteOne({ _id: req.params.id });
     res.redirect('/dashboard');
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 

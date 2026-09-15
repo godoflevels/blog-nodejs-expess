@@ -3,7 +3,7 @@ const router = express.Router();
 const Post = require('../models/Post');
 
 // Routes GET / HOME
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     const locals = {
       title: "godoflevel Blog",
@@ -20,12 +20,12 @@ router.get('/', async (req, res) => {
     const hasNextPage = nextPage <= Math.ceil(count / perPage);
     res.render('index', { locals, data, current: page, nextPage: hasNextPage ? nextPage : null, currentRoute: '/' });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
 // Router GET / Post :id
-router.get('/post/:id', async (req, res) => {
+router.get('/post/:id', async (req, res, next) => {
   try {
     let id = req.params.id;
 
@@ -36,12 +36,12 @@ router.get('/post/:id', async (req, res) => {
     }
     res.render('post', { locals, data, currentRoute: `/post/${id}` })
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 })
 
 // Router POST / Post :id
-router.post('/search', async (req, res) => {
+router.post('/search', async (req, res, next) => {
   try {
     const locals = {
       title: "Search",
@@ -49,7 +49,12 @@ router.post('/search', async (req, res) => {
     }
 
     let searchTerm = req.body.searchTerm;
-    const searchNoSpecialChar = searchTerm.replace(/[^\p{L}\p{N}\s]/gu, "");
+
+    if (!searchTerm || !searchTerm.trim()) {
+      return res.redirect('/');
+    }
+
+    const searchNoSpecialChar = searchTerm.trim().replace(/[^\p{L}\p{N}\s]/gu, "");
 
     const data = await Post.find({
       $or: [
@@ -57,9 +62,9 @@ router.post('/search', async (req, res) => {
       { body: { $regex: new RegExp(searchNoSpecialChar, 'i')}},
       ]
     });
-    res.render("search", {data, locals});
+    res.render("search", {data, locals, currentRoute: '/search'});
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 })
 
